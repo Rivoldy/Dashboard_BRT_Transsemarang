@@ -18,6 +18,7 @@
   <style>
     #map { height: 400px; }
   </style>
+  
   <!-- sweet alert -->
   <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
@@ -44,3 +45,24 @@
   }
   
  </style>
+
+ <style>
+/* agar small box memiliki tinggi yang sama */
+.small-box {
+  min-height: 162px; /* Tinggi minimal*/
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Membagi ruang secara merata */
+}
+
+.small-box .inner {
+  margin: 10px; /* Margin uniform untuk semua .inner */
+}
+
+.small-box .icon {
+  position: absolute; /* Menetapkan posisi ikon */
+  top: 10px; /* Uniform top margin for icon */
+  right: 10px; /* Uniform right margin for icon */
+}
+</style>
+

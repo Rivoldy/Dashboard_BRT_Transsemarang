@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: TransSemarang.php");
+    exit;  
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,12 +27,12 @@
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-6">
-              <h1 class="m-0">Dashboard</h1>
+              <h1 class="m-0">Informasi Umum</h1>
             </div><!-- /.col -->
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
                 <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item active">Dashboard Trans Semarang</li>
+                <li class="breadcrumb-item active">Informasi Umum Trans Semarang</li>
               </ol>
             </div><!-- /.col -->
           </div><!-- /.row -->
@@ -46,16 +53,13 @@
       <div class="p-1 flex-fill" style="overflow: hidden">
         <!-- Map will be created here -->
         <?php include 'map.php'?>
-          <!-- Twitter Update Section -->
+        <!-- Twitter Update Section -->
         <div class="col-lg-6">
-          <div class="card bg-gradient-info">
-            <div class="card-header border-0">  
-              <h3 class="card-title text-white">Informasi</h3>
-               </div>
-             <div class="card-body">
-               <a class="twitter-timeline" data-lang="id" data-width="800" data-height="600" data-theme="light" href="https://twitter.com/Transsemarang?ref_src=twsrc%5Etfw">Tweets by Transsemarang</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-             </div>
+         <div class="card-body">
+          <div class="responsive-container">
+        <a class="twitter-timeline" id="twitter-timeline" data-lang="id" data-height="600" data-theme="light" href="https://twitter.com/Transsemarang?ref_src=twsrc%5Etfw">Tweets by Transsemarang</a>
           </div>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
         </div>
         <!-- /.row -->
       </div>

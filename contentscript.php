@@ -25,37 +25,6 @@
     map.fitBounds(bounds);
 </script>
 
-<!-- <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
-<script>
-  var map = L.map('map').setView([-6.966667, 110.416667], 13); // Pusat peta di kota Semarang
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
-
-  // Tambahkan marker untuk Terminal Mangkang
-  var markerMangkang = L.marker([-6.96868, 110.28966]).addTo(map)
-    .bindPopup('Terminal Mangkang')
-    .openPopup();
-
-  // Tambahkan marker untuk Terminal Penggaron
-  var markerPenggaron = L.marker([-7.01747, 110.49347]).addTo(map)
-    .bindPopup('Terminal Penggaron')
-    .openPopup();
-
-  // Tambahkan polyline untuk menunjukkan rute
-  var latlngs = [
-      [-6.96868, 110.28966], 
-      [-6.99037, 110.42293],
-      [-7.01747, 110.49347]
-  ];
-  var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
-
-  // Zoom peta agar semua marker terlihat
-  map.fitBounds(polyline.getBounds());
-</script> -->
-
 <!-- Show/hide Route -->
 <script>
   // Get the button and the card containing the route list
@@ -127,3 +96,109 @@ function showPaymentInfo() {
 }
 </script>
 
+<!-- Cuaca -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  fetchWeatherData();
+});
+
+function fetchWeatherData() {
+  const apiKey = '4f6b3b54850ed3da4024173360334f49'; //API KEY
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=Semarang&appid=${apiKey}&units=metric`;
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      updateWeatherDashboard(data);
+    })
+    .catch(error => {
+      console.error('Error fetching weather data:', error);
+      document.getElementById('weatherDescription').textContent = 'Failed to load data';
+    });
+}
+
+function updateWeatherDashboard(data) {
+  const temperature = data.main.temp;
+  const weatherDescription = data.weather[0].description;
+  const humidity = data.main.humidity;
+  const windSpeed = data.wind.speed;
+  const windDirection = data.wind.deg;
+  const pressure = data.main.pressure;
+  const tempMax = data.main.temp_max;
+  const tempMin = data.main.temp_min;
+
+  document.getElementById('weatherTemperature').textContent = `${temperature.toFixed(1)}°C`;
+  document.getElementById('weatherDescription').textContent = weatherDescription.charAt(0).toUpperCase() + weatherDescription.slice(1);
+  document.getElementById('modalTemp').textContent = `${temperature.toFixed(1)}°C`;
+  document.getElementById('modalDesc').textContent = weatherDescription.charAt(0).toUpperCase() + weatherDescription.slice(1);
+  document.getElementById('modalHumidity').textContent = `${humidity}%`;
+  document.getElementById('modalWindSpeed').textContent = `${windSpeed.toFixed(1)} m/s`;
+  document.getElementById('modalWindDirection').textContent = `${windDirection}°`;
+  document.getElementById('modalPressure').textContent = `${pressure} hPa`;
+  document.getElementById('modalTempMax').textContent = `${tempMax.toFixed(1)}°C`;
+  document.getElementById('modalTempMin').textContent = `${tempMin.toFixed(1)}°C`;
+  // Update more fields as needed
+}
+function showWeatherDetails() {
+  // Pastikan data sudah dimuat, jika tidak tampilkan pesan error
+  if (!document.getElementById('weatherTemperature').textContent.includes('°C')) {
+    Swal.fire({
+      title: 'Data not loaded',
+      text: 'Please wait for the weather data to load or check your network connection.',
+      icon: 'error',
+      confirmButtonText: 'Tutup'
+    });
+    return;
+  }
+
+  // Jika data dimuat, tampilkan detail cuaca
+  Swal.fire({
+    title: '<strong class="custom-title">Detail Cuaca Semarang Sekarang</strong>',
+    html: `
+      <div class="text-left">
+        <p>Suhu: <span class="warna-text">${document.getElementById('weatherTemperature').textContent}</span></p>
+        <p>Deskripsi: <span class="warna-text">${document.getElementById('weatherDescription').textContent}</span></p>
+        <p>Kelembaban: <span class="warna-text">${document.getElementById('modalHumidity').textContent}</span></p>
+        <p>Kecepatan Angin: <span class="warna-text">${document.getElementById('modalWindSpeed').textContent}</span></p>
+        <p>Arah Angin: <span class="warna-text">${document.getElementById('modalWindDirection').textContent}</span></p>
+        <p>Tekanan: <span class="warna-text">${document.getElementById('modalPressure').textContent}</span></p>
+        <p>Suhu Maks: <span class="warna-text">${document.getElementById('modalTempMax').textContent}</span></p>
+        <p>Suhu Min: <span class="warna-text">${document.getElementById('modalTempMin').textContent}</span></p>
+      </div>
+    `,
+    icon: 'info',
+    confirmButtonText: 'Tutup',
+    confirmButtonColor: '#4ca4b5'
+  });
+}
+
+</script>
+
+<script>
+function showSystemInfo() {
+  Swal.fire({
+    title: 'Detail Sistem Informasi Trans Semarang',
+    html: `
+      <ul>
+        <li><strong>Sistem Pemantauan GPS:</strong> Melacak posisi bus secara real-time.</li>
+        <li><strong>Sistem Informasi Penumpang:</strong> Menampilkan informasi rute dan jadwal bus.</li>
+        <li><strong>Intelligent Transportation System (ITS):</strong> Integrasi teknologi untuk efisiensi dan keamanan.</li>
+        <li><strong>Sistem Ticketing Elektronik:</strong> Pembayaran non-tunai menggunakan kartu smart card.</li>
+        <li><strong>Aplikasi Mobile:</strong> Informasi rute, jadwal, dan pembelian tiket melalui smartphone. <br>Download:
+          <a href="https://play.google.com/store/apps/details?id=ngi.brtsemarang.apppublic&hl=id" target="_blank">Google Play</a> |
+          <a href="https://apps.apple.com/id/app/trans-semarang/id1460565652" target="_blank">App Store</a>.
+        </li>
+        <li><strong>Sistem Manajemen Pengaduan:</strong> Mengelola feedback dan keluhan penumpang.</li>
+      </ul>
+    `,
+    icon: 'info',
+    confirmButtonText: 'Tutup',
+    confirmButtonColor: '#4ca4b5'
+  });
+}
+</script>

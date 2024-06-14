@@ -37,56 +37,197 @@
 <!-- ChartJS -->
 <script src="plugins/chart.js/Chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
 <!-- Twitter Widget -->
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
+
 <!-- Grafik Jumlah Penumpang -->
 <script>
-  // Data untuk grafik
-  var passengerData = {
-    labels: ['2017', '2018', '2019', '2020', '2021'],
+    async function fetchData() {
+        const response = await fetch('get_passenger_statistics.php');
+        const data = await response.json();
+        return data;
+    }
+    document.addEventListener('DOMContentLoaded', createChart);
+
+async function createChart() {
+    const fetchedData = await fetchData();
+    const ctx = document.getElementById('passengersChart').getContext('2d');
+    const passengersChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: fetchedData.map(item => item.year),
+            datasets: [{
+                label: 'Penumpang Per Tahun',
+                data: fetchedData.map(item => item.total_annual_passengers),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                yAxisID: 'y'
+            }, {
+                label: 'Rata-rata Penumpang Harian',
+                data: fetchedData.map(item => item.average_daily_passengers),
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Penumpang Per Tahun'
+                    }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Rata-rata Penumpang Harian'
+                    },
+                    grid: {
+                        drawOnChartArea: false 
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+</script>
+
+<!-- Grafik Penumpang PerJam -->
+<script>
+var timeLabels = <?php echo json_encode($times); ?>;
+var normalPassengerData = <?php echo json_encode($normalPassengerCounts); ?>;
+var weekendPassengerData = <?php echo json_encode($weekendPassengerCounts); ?>;
+
+var ctx = document.getElementById('passengersperhour').getContext('2d');
+var passengersperhour = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: timeLabels,
     datasets: [{
-      label: 'Jumlah Penumpang',
-      data: [3456543, 3751045, 3916225, 2164420, 1588135],
+      label: 'Jumlah Penumpang Hari Biasa',
+      data: normalPassengerData,
       backgroundColor: 'rgba(54, 162, 235, 0.5)',
       borderColor: 'rgba(54, 162, 235, 1)',
-      borderWidth: 1
+      fill: false,
+      tension: 0.1
+    }, {
+      label: 'Jumlah Penumpang Weekend',
+      data: weekendPassengerData,
+      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      borderColor: 'rgba(255, 99, 132, 1)',
+      fill: false,
+      tension: 0.1
     }]
-  };
-
-  // Konfigurasi grafik
-  var chartOptions = {
+  },
+  options: {
+    responsive: true,
     scales: {
       y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Jumlah Penumpang'
-        }
+        beginAtZero: true
       }
     },
     plugins: {
-      legend: {
-        display: true,
-        position: 'top'
+      datalabels: {
+        anchor: 'end',
+        align: 'top',
+        formatter: Math.round,
+        font: {
+          weight: 'bold'
+        }
+      },
+      zoom: {
+        zoom: {
+          wheel: {
+            enabled: true,
+          },
+          pinch: {
+            enabled: true
+          },
+          mode: 'xy'
+        },
+        pan: {
+          enabled: true,
+          mode: 'xy'
+        }
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false
+      },
+      annotation: {
+        annotations: {
+          line1: {
+            type: 'line',
+            yMin: 80,
+            yMax: 80,
+            borderColor: 'rgb(255, 0, 0)',
+            borderWidth: 2,
+            label: {
+              content: 'Penumpang Maksimal BRT Trans Semarang',
+              enabled: true,
+              position: 'center',
+              backgroundColor: 'rgba(255, 0, 0, 0.6)'
+            }
+          }
+        }
       }
-    },
-    responsive: true,
-    maintainAspectRatio: false
-  };
-
-  // Buat grafik
-  var ctx = document.getElementById('passengers-chart').getContext('2d');
-  var passengersChart = new Chart(ctx, {
-    type: 'line',
-    data: passengerData,
-    options: chartOptions
-  });
-
-  // Fungsi untuk memicu pencetakan
-  function printReport() {
-    window.print();
+    }
   }
+});
+</script>
+
+<!-- Penumpang perhalte -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var ctx = document.getElementById('halteChart').getContext('2d');
+        var halteChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [<?php echo '"' . implode('", "', array_column($halteData, 'nama_halte')) . '"'; ?>],
+                datasets: [{
+                    label: 'Rata-rata Jumlah Penumpang per Hari',
+                    data: [<?php echo implode(', ', array_column($halteData, 'jumlah_penumpang')); ?>],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    });
 </script>
 
 <!-- Pie chart -->
@@ -134,4 +275,72 @@ var <?= $key ?>PieChart = new Chart(ctx, {
   }
 });
 <?php endforeach; ?>
+</script>
+
+<script>
+  $('.editBtn').click(function() {
+    var currentRow = $(this).closest('tr');
+    var year = currentRow.find('td:eq(0)').text(); // Tahun sebagai pengenal unik
+    var total = currentRow.find('td:eq(1)').text();
+    var average = currentRow.find('td:eq(2)').text();
+
+    $('#editYear').val(year);
+    $('#editTotal').val(total);
+    $('#editAverage').val(average);
+
+    $('#editModal').modal('show');
+});
+
+function submitEdit() {
+    var formData = $('#editForm').serialize();
+    $.ajax({
+        url: 'update_passenger_data.php',
+        type: 'POST',
+        data: formData,
+        success: function(response) {
+            location.reload(); // Reload untuk melihat perubahan
+        },
+        error: function() {
+            alert('Error updating data.');
+        }
+    });
+}
+function submitAdd() {
+    var formData = $('#addForm').serialize();
+    $.ajax({
+        url: 'add_passenger_data.php',
+        type: 'POST',
+        data: formData,
+        success: function(response) {
+            location.reload(); // Reload untuk melihat data baru
+        },
+        error: function() {
+            alert('Error adding data.');
+        }
+    });
+}
+$('.deleteBtn').click(function() {
+    var currentRow = $(this).closest('tr');
+    var year = currentRow.find('td:eq(0)').text(); // Tahun sebagai pengenal unik
+
+    $('#deleteYear').val(year);
+
+    $('#deleteModal').modal('show');
+});
+
+function submitDelete() {
+    var formData = $('#deleteForm').serialize();
+    $.ajax({
+        url: 'delete_passenger_data.php',
+        type: 'POST',
+        data: formData,
+        success: function(response) {
+            location.reload(); // Reload untuk melihat perubahan
+        },
+        error: function() {
+            alert('Error deleting data.');
+        }
+    });
+}
+
 </script>
